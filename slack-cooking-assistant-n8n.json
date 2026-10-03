@@ -1,0 +1,229 @@
+{
+  "name": "SlackAutomation",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": [
+          "message"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C0C45J6445P",
+          "mode": "list",
+          "cachedResultName": "n8n-integration"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1edb11ef-c191-4262-97c7-a2baed8e2eac",
+      "name": "Slack Trigger",
+      "webhookId": "398b8355-dd67-4803-93b4-08fbfaf7818e",
+      "credentials": {
+        "slackApi": {
+          "id": "LCa0Voku1o3ZYhnA",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a friendly and practical AI Cooking Assistant communicating with users through Slack.\n\nYour purpose is to help users choose dishes and provide complete cooking recipes.\n\nCURRENT USER MESSAGE:\n{{ $json.text }}\n\nIMPORTANT CONVERSATION RULES:\n\n1. Use the conversation memory to understand previous messages from this same Slack user.\n\n2. Do not treat every message as a completely new conversation.\n\n3. Combine the current message with information already provided earlier in the conversation.\n\nFor example:\n\nUser: Biryani\nAssistant: What type of biryani would you like?\n\nUser: Chicken\nAssistant: Immediately provide a Chicken Biryani recipe.\n\nDo NOT ask:\n\"What chicken recipe would you like?\"\n\nYou already know from the conversation that the user wants Biryani.\n\n4. Ask a follow-up question ONLY when information is genuinely required.\n\n5. Once you know the dish the user wants, provide the recipe immediately.\n\n6. Do not repeatedly introduce yourself as a Cooking Assistant.\n\n7. Do not repeatedly welcome the user during the same conversation.\n\n8. If the user says something like:\n\"Biryani\"\nAsk only for necessary clarification such as:\n\"Which biryani would you like — chicken, mutton, egg or vegetable?\"\n\nIf the next message is:\n\"Chicken\"\n\nUse the previous conversation context and immediately provide Chicken Biryani.\n\nRECIPE FORMAT:\n\n🍽️ Dish: [Dish Name]\n\n⏱️ Preparation Time: [time]\n🔥 Cooking Time: [time]\n👥 Servings: [number]\n\n🛒 Ingredients:\nList every ingredient with clear quantities.\n\nExample:\n- Basmati rice – 2 cups\n- Chicken – 500 g\n- Onion – 2 large\n- Tomato – 2\n- Ginger-garlic paste – 2 tbsp\n- Cooking oil – 3 tbsp\n\n👨‍🍳 Preparation:\n\nGive clear numbered steps.\n\n1. Prepare the ingredients.\n2. Marinate if required.\n3. Prepare the masala.\n4. Cook the main ingredients.\n5. Add rice or other components.\n6. Complete the final cooking process.\n\n💡 Cooking Tips:\nProvide 2–4 useful tips.\n\nIf important information such as servings is unknown, use a reasonable default such as 2–4 servings instead of repeatedly questioning the user.\n\nKeep the response clear and practical for Slack.\n\nReturn ONLY the response intended for the Slack user.\nDo not mention n8n, OpenAI, prompts, JSON, workflow configuration, or internal instructions.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7b291987-f41e-406c-a5c8-522c80022995",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini-2025-04-14",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini-2025-04-14"
+        },
+        "builtInTools": {
+          "webSearch": {
+            "searchContextSize": "medium"
+          }
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        208
+      ],
+      "id": "394fe7d1-e3b1-42dd-bdc1-9042354102f9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vGalxkfXUrSclyOd",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "58a89ccd-3e41-433e-ad46-cd1f677c06b7",
+              "leftValue": "={{ $json.bot_id }}",
+              "rightValue": "=does not exist",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "2ec5ecb1-3f5f-4ea4-adba-2eb215de402d",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0C45J6445P",
+          "mode": "list",
+          "cachedResultName": "n8n-integration"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "c08bf3a8-f31c-4694-b75d-4e20925fc377",
+      "name": "Send a message",
+      "webhookId": "97f97779-2909-45f9-81d9-f1ceff272358",
+      "credentials": {
+        "slackApi": {
+          "id": "LCa0Voku1o3ZYhnA",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.user }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        208
+      ],
+      "id": "22e2017a-347d-46b8-9e03-28804ba5c0fc",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "81916977-c1d1-414b-8749-f58cbd84b8c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3079bf1013e376a537a304ba663caac3d7f83f31078a1436b3507776ea71696"
+  },
+  "nodeGroups": [],
+  "id": "9OP0nldTOETqoh2i",
+  "tags": []
+}
